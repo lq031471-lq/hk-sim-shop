@@ -1349,11 +1349,7 @@ window.syncToGithub=function(){
     }).catch(err=>{
       console.error('GitHub sync error:',err);
       if(statusDiv)statusDiv.innerHTML='<span style="color:#ff6b7a">❌ 同步失败：'+err.message+'<br>请检查 Token 是否正确，或刷新页面重试</span>';
-      toast('同步失败：'+err.message);
-    });
-  }).catch(()=>{
-    if(statusDiv)statusDiv.innerHTML='<span style="color:#ff6b7a">❌ 生成更新文件失败</span>';
-    toast('生成更新文件失败');
+    toast('同步失败：'+err.message);
   });
 };
 
