@@ -1276,20 +1276,29 @@ window.syncToGithub=function(){
   const statusDiv=$('#syncStatus');
   if(statusDiv)statusDiv.innerHTML='<span style="color:#fdcb6e">⏳ 正在准备同步...</span>';
   
-  // 生成最新 HTML 内容
-  fetch(location.origin+location.pathname).then(r=>r.text()).then(html=>{
-    try{
-      const products=JSON.parse(localStorage.getItem('ss_products'));
-      if(products) html=html.replace(/const defaultProducts=\[.*?\];/s,'const defaultProducts='+JSON.stringify(products)+';');
-    }catch(e){}
-    try{
-      const cats=JSON.parse(localStorage.getItem('ss_categories'));
-      if(cats) html=html.replace(/const defaultCategories=\[.*?\];/s,'const defaultCategories='+JSON.stringify(cats)+';');
-    }catch(e){}
-    try{
-      const s=JSON.parse(localStorage.getItem('ss_settings'));
-      if(s){ s.adminPassword=''; html=html.replace(/const defaultSettings=\{.*?\};/s,'const defaultSettings='+JSON.stringify(s)+';'); }
-    }catch(e){}
+  // 使用当前页面 HTML 作为基础，替换数据
+  let html='<!DOCTYPE html>'+document.documentElement.outerHTML;
+  // 清理敏感信息
+  html=html.replace(/github_pat_[a-zA-Z0-9_]+/g,'');
+  html=html.replace(/adminPassword:'[^']*'/g,"adminPassword:''");
+  html=html.replace(/githubToken:'[^']*'/g,"githubToken:''");
+  // 替换商品数据
+  try{
+    const products=JSON.parse(localStorage.getItem('ss_products'));
+    if(products) html=html.replace(/const defaultProducts=\[.*?\];/s,'const defaultProducts='+JSON.stringify(products)+';');
+  }catch(e){}
+  try{
+    const cats=JSON.parse(localStorage.getItem('ss_categories'));
+    if(cats) html=html.replace(/const defaultCategories=\[.*?\];/s,'const defaultCategories='+JSON.stringify(cats)+';');
+  }catch(e){}
+  try{
+    const s=JSON.parse(localStorage.getItem('ss_settings'));
+    if(s){ 
+      s.adminPassword='';
+      s.githubToken='';
+      html=html.replace(/const defaultSettings=\{.*?\};/s,'const defaultSettings='+JSON.stringify(s)+';');
+    }
+  }catch(e){}
     
     if(statusDiv)statusDiv.innerHTML='<span style="color:#fdcb6e">⏳ 正在上传到 GitHub...</span>';
     
