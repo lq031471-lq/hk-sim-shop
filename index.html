@@ -437,7 +437,11 @@ const defaultSettings={
   notice:'',
   qrCode:{wechat:'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=wechat_pay_placeholder',alipay:'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=alipay_placeholder',usdt:'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=usdt_placeholder'},
   pushKey:'',
-  wechatQr:''
+  wechatQr:'',
+  githubToken:'',
+  githubOwner:'lq031471-lq',
+  githubRepo:'hk-sim-shop',
+  githubBranch:'main'
 };
 
 function loadData(key,def){
@@ -749,7 +753,7 @@ function renderAdmin(app){
     app.innerHTML=`<div class="admin-login"><div class="login-box"><div class="login-icon">🔐</div><h2>商家后台系统</h2><div class="login-sub">请输入管理密码</div><input type="password" id="adminPwd" placeholder="请输入管理密码" onkeydown="if(event.key==='Enter')doAdminLogin()"><button onclick="doAdminLogin()">登录</button></div></div>`;
     return;
   }
-  const tabs=[['products','商品管理'],['orders','订单管理'],['sales','每日销售'],['profit','利润统计'],['qrcode','支付二维码'],['contact','联系方式'],['notice','公告编辑'],['push','推送配置']];
+  const tabs=[['products','商品管理'],['orders','订单管理'],['sales','每日销售'],['profit','利润统计'],['qrcode','支付二维码'],['contact','联系方式'],['notice','公告编辑'],['push','推送配置'],['github','GitHub同步']];
   app.innerHTML=`<div class="admin-header"><div class="admin-header-content"><div class="logo"><div class="logo-icon">🏪</div><h1>商家后台系统</h1></div><div class="admin-nav">${tabs.map(([k,v])=>`<button class="${adminTab===k?'active':''}" onclick="switchAdminTab('${k}')">${v}</button>`).join('')}</div><button class="exit-btn" onclick="adminAuthed=false;navigate('#/')">退出</button></div></div><div class="admin-content" id="adminContent"></div>`;
   renderAdminTab();
 }
@@ -775,6 +779,7 @@ function renderAdminTab(){
   else if(adminTab==='contact')renderAdminContact(c);
   else if(adminTab==='notice')renderAdminNotice(c);
   else if(adminTab==='push')renderAdminPush(c);
+  else if(adminTab==='github')renderAdminGithub(c);
 }
 
 // --- 商品管理（带分类筛选）---
@@ -1247,6 +1252,100 @@ window.testPush=function(){
   const settings=getSettings();
   if(!settings.pushKey){toast('请先填写SendKey');return}
   fetch('https://sctapi.ftqq.com/'+settings.pushKey+'.send',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:'title='+encodeURIComponent('测试通知')+'&desp='+encodeURIComponent('这是一条来自香港流量卡平台的测试通知')}).then(r=>r.json()).then(d=>{if(d.code===0)toast('测试通知已发送');else toast('发送失败：'+(d.message||'未知错误'));}).catch(()=>toast('网络错误'));
+};
+
+// --- GitHub 自动同步 ---
+function renderAdminGithub(c){
+  const settings=getSettings();
+  const token=settings.githubToken||'';
+  const hasToken=!!token;
+  c.innerHTML=`<div class="admin-section active"><div class="admin-card"><h2>GitHub 自动同步</h2><div class="stat-card"><div class="stat-label">配置说明</div><p style="color:#a0a0b0;font-size:13px;margin:12px 0;line-height:1.8">配置 GitHub Token 后，您可以直接在后台一键同步网站到 GitHub，无需手动上传文件。<br>Token 仅保存在您的浏览器中，不会上传到任何服务器。</p></div><div class="stat-card"><div class="stat-label">GitHub Token</div><p style="color:#a0a0b0;font-size:12px;margin:8px 0">获取地址：<a href="https://github.com/settings/tokens?type=beta" target="_blank" style="color:#667eea">https://github.com/settings/tokens?type=beta</a></p><input type="password" id="githubToken" value="${token}" placeholder="粘贴 GitHub Fine-grained Token" style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#fff;padding:12px;border-radius:10px;margin-bottom:12px;font-size:13px"><button class="btn-primary" onclick="saveGithubToken()">保存 Token</button>${hasToken?'<button class="btn-secondary" onclick="syncToGithub()" style="margin-left:8px;background:linear-gradient(135deg,#00b894 0%,#00cec9 100%);color:#fff">🚀 一键同步到 GitHub</button>':'<button class="btn-secondary" onclick="syncToGithub()" style="margin-left:8px" disabled>🚀 一键同步到 GitHub</button>'}</div>${hasToken?`<div class="stat-card"><div class="stat-label">同步状态</div><div id="syncStatus" style="color:#a0a0b0;font-size:13px;margin-top:12px">点击上方"一键同步"按钮开始同步</div></div>`:''}</div></div>`;
+}
+
+window.saveGithubToken=function(){
+  const settings=getSettings();
+  settings.githubToken=$('#githubToken').value.trim();
+  setSettings(settings);
+  toast('Token 已保存');
+  renderAdminTab();
+};
+
+window.syncToGithub=function(){
+  const settings=getSettings();
+  if(!settings.githubToken){toast('请先配置 GitHub Token');return;}
+  const statusDiv=$('#syncStatus');
+  if(statusDiv)statusDiv.innerHTML='<span style="color:#fdcb6e">⏳ 正在准备同步...</span>';
+  
+  // 生成最新 HTML 内容
+  fetch(location.origin+location.pathname).then(r=>r.text()).then(html=>{
+    try{
+      const products=JSON.parse(localStorage.getItem('ss_products'));
+      if(products) html=html.replace(/const defaultProducts=\[.*?\];/s,'const defaultProducts='+JSON.stringify(products)+';');
+    }catch(e){}
+    try{
+      const cats=JSON.parse(localStorage.getItem('ss_categories'));
+      if(cats) html=html.replace(/const defaultCategories=\[.*?\];/s,'const defaultCategories='+JSON.stringify(cats)+';');
+    }catch(e){}
+    try{
+      const s=JSON.parse(localStorage.getItem('ss_settings'));
+      if(s){ s.adminPassword=''; html=html.replace(/const defaultSettings=\{.*?\};/s,'const defaultSettings='+JSON.stringify(s)+';'); }
+    }catch(e){}
+    
+    if(statusDiv)statusDiv.innerHTML='<span style="color:#fdcb6e">⏳ 正在上传到 GitHub...</span>';
+    
+    // 使用 GitHub API 上传
+    const owner=settings.githubOwner||'lq031471-lq';
+    const repo=settings.githubRepo||'hk-sim-shop';
+    const branch=settings.githubBranch||'main';
+    const path='index.html';
+    const message='Update: sync products data via admin panel - '+new Date().toLocaleString('zh-CN');
+    const content=btoa(unescape(encodeURIComponent(html)));
+    
+    // 先获取当前文件 SHA
+    fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}?ref=${branch}`,{
+      headers:{'Authorization':'Bearer '+settings.githubToken,'Accept':'application/vnd.github.v3+json'}
+    }).then(r=>{
+      if(r.status===404){
+        // 文件不存在，直接创建
+        return {sha:null};
+      }
+      return r.json();
+    }).then(fileData=>{
+      const body={
+        message:message,
+        content:content,
+        branch:branch
+      };
+      if(fileData.sha) body.sha=fileData.sha;
+      
+      return fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`,{
+        method:'PUT',
+        headers:{
+          'Authorization':'Bearer '+settings.githubToken,
+          'Accept':'application/vnd.github.v3+json',
+          'Content-Type':'application/json'
+        },
+        body:JSON.stringify(body)
+      });
+    }).then(r=>{
+      if(!r.ok){
+        return r.json().then(err=>{
+          throw new Error(err.message||'上传失败');
+        });
+      }
+      return r.json();
+    }).then(data=>{
+      if(statusDiv)statusDiv.innerHTML='<span style="color:#00b894">✅ 同步成功！网站将在1-2分钟后自动更新<br>访问地址：<a href="https://lq031471-lq.github.io/hk-sim-shop" target="_blank" style="color:#667eea">https://lq031471-lq.github.io/hk-sim-shop</a></span>';
+      toast('同步成功！');
+    }).catch(err=>{
+      console.error('GitHub sync error:',err);
+      if(statusDiv)statusDiv.innerHTML='<span style="color:#ff6b7a">❌ 同步失败：'+err.message+'<br>请检查 Token 是否正确，或刷新页面重试</span>';
+      toast('同步失败：'+err.message);
+    });
+  }).catch(()=>{
+    if(statusDiv)statusDiv.innerHTML='<span style="color:#ff6b7a">❌ 生成更新文件失败</span>';
+    toast('生成更新文件失败');
+  });
 };
 
 // ====== 启动 ======
