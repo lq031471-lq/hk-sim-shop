@@ -348,7 +348,7 @@ button:active{transform:scale(.98)}
 .cat-filter-bar .cat-filter-btn.active{background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;box-shadow:0 4px 12px rgba(102,126,234,.3)}
 
 /* 通用 */
-.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.9);color:#fff;padding:12px 24px;border-radius:12px;z-index:99999;font-size:14px;font-weight:500;backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);animation:toastIn .4s cubic-bezier(.175,.885,.32,1.275);max-width:90%;text-align:center}
+.toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.9);color:#fff;padding:12px 24px;border-radius:12px;z-index:99999;font-size:14px;font-weight:500;backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);animation:toastIn .4s cubic-bezier(.175,.885,.32,1.275) forwards;max-width:90%;text-align:center;transition:opacity .3s ease,transform .3s ease}
 @keyframes toastIn{from{opacity:0;transform:translateX(-50%) translateY(20px) scale(.9)}to{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes slideUp{from{opacity:0;transform:translateY(30px)}to{opacity:1;transform:translateY(0)}}
@@ -368,8 +368,12 @@ button:active{transform:scale(.98)}
   .product-grid{grid-template-columns:repeat(2,1fr);gap:12px}
   .product-card .name{font-size:12px}
   .app-header h1{font-size:18px}
-  .admin-header-content{flex-direction:column;align-items:stretch}
-  .admin-header .admin-nav{justify-content:center}
+  .admin-header-content{flex-direction:column;align-items:stretch;gap:8px}
+  .admin-header .admin-nav{justify-content:flex-start;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch;flex-wrap:nowrap}
+  .admin-header .admin-nav button{padding:8px 12px;font-size:13px;flex-shrink:0}
+  .admin-header h1{font-size:16px}
+  .admin-header .logo-icon{width:32px;height:32px;font-size:16px}
+  .admin-header .exit-btn{align-self:flex-end}
   .admin-table{font-size:12px}
   .admin-table th,.admin-table td{padding:10px 8px}
   .stat-grid{grid-template-columns:1fr}
@@ -377,6 +381,66 @@ button:active{transform:scale(.98)}
   .contact-section .qr-toggle{width:100%;text-align:center}
   .detail-hero .detail-img{width:160px;height:160px}
   .pay-page .pay-header .pay-amount{font-size:32px}
+
+  /* 商家后台手机端优化 */
+  .admin-content{padding:12px}
+  .admin-card{padding:16px}
+  .admin-card h2{font-size:18px}
+  .admin-login .login-box{padding:32px 24px;margin:16px}
+  .admin-login .login-box h2{font-size:20px}
+  .admin-toolbar{flex-direction:column;gap:8px}
+  .admin-toolbar button{width:100%;min-height:44px;font-size:14px}
+  .admin-toolbar .cat-filter-bar{flex-wrap:wrap}
+  .admin-table{display:block;overflow-x:auto;white-space:nowrap}
+  .admin-table table{min-width:600px}
+  .modal-box{width:95%;padding:20px;margin:16px}
+  .modal-box h2{font-size:18px}
+
+  /* 客户端手机端优化 */
+  .product-card .img-wrap{aspect-ratio:1}
+  .app-header .subtitle{display:none}
+  .app-header .nav-bar{gap:8px}
+  .app-header .nav-bar a{padding:8px 14px;font-size:13px}
+  .cart-item{flex-direction:column;gap:8px;align-items:flex-start}
+  .cart-item img{width:100%;height:140px;border-radius:12px}
+  .cart-item .ci-info{width:100%}
+  .cart-item .qty-ctrl{align-self:flex-end}
+  .cart-item .del-btn{align-self:flex-end}
+  .cart-summary{flex-direction:column;gap:12px}
+  .cart-summary .total{text-align:center}
+  .cart-summary .checkout-btn{width:100%}
+  .checkout-page{padding:12px}
+  .checkout-form{padding:16px}
+  .checkout-form input,.checkout-form textarea{font-size:16px;padding:12px}
+  .order-items{padding:16px}
+  .order-card{padding:14px}
+  .oc-header{flex-direction:column;gap:6px;align-items:flex-start}
+  .oc-items{font-size:13px}
+  .pay-page{padding:16px}
+  .pay-page .pay-header h2{font-size:18px}
+  .pay-page .pay-tabs{gap:8px}
+  .pay-page .pay-tab{padding:10px 12px;font-size:13px}
+  .pay-page .pay-qr-box img{max-width:200px}
+  .pay-page .pay-info{padding:16px}
+  .pay-page .pay-actions{flex-direction:column;gap:8px}
+  .pay-page .pay-btn{width:100%}
+  .detail-hero{padding:16px 12px 48px}
+  .detail-hero .detail-img{width:140px;height:140px}
+  .detail-hero-content{text-align:center}
+  .detail-body{padding:20px 12px 90px}
+  .detail-body h2{font-size:18px}
+  .detail-body .detail-price{font-size:26px}
+  .detail-body .params-box,.detail-body .usage-box{padding:16px}
+  .detail-body .buy-bar{padding:10px 12px}
+  .detail-body .buy-bar .price-info .price{font-size:20px}
+  .detail-body .buy-bar .buy-btn{padding:12px;font-size:15px}
+
+  /* 通用手机端优化 */
+  input,select,textarea,button{min-height:44px;font-size:16px}
+  input[type="text"],input[type="tel"],input[type="number"],select{padding:12px}
+  .btn,.icon-btn,.add-btn{min-height:44px;min-width:44px}
+  .oq-input,.oq-btn{font-size:16px;min-height:48px}
+  .oq-btn{width:100%;margin-top:10px}
 }
 </style>
 </head>
@@ -388,8 +452,19 @@ button:active{transform:scale(.98)}
 function $(s,p=document){return p.querySelector(s)}
 function $$(s,p=document){return p.querySelectorAll(s)}
 function toast(msg){
-  const t=document.createElement('div');t.className='toast';t.textContent=msg;document.body.appendChild(t);
-  setTimeout(()=>{t.style.animation='fadeIn .3s reverse';setTimeout(()=>t.remove(),300)},2500)
+  const existing = document.querySelector('.toast');
+  if (existing) existing.remove();
+  const t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => {
+    t.style.animation = 'none';
+    void t.offsetWidth;
+    t.style.opacity = '0';
+    t.style.transform = 'translateX(-50%) translateY(20px)';
+    setTimeout(() => { if(t.parentNode) t.remove(); }, 300);
+  }, 2500);
 }
 function fmtPrice(n){return '¥'+Number(n).toFixed(2).replace(/\.00$/,'')}
 function fmtDate(d){const dt=new Date(d);return dt.getFullYear()+'-'+String(dt.getMonth()+1).padStart(2,'0')+'-'+String(dt.getDate()).padStart(2,'0')}
