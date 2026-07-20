@@ -1,0 +1,8 @@
+{
+  "name": "hk-sim-shop",
+  "version": "1.0.0",
+  "description": "香港流量卡国内一手平台 - 购物系统",
+  "scripts": {
+    "deploy": "echo 请按照 README.md 中的步骤部署到 GitHub Pages"
+  }
+}
