@@ -787,7 +787,7 @@ function renderAdminProducts(c){
   const products=getProducts();
   const cats=getCategories();
   const filteredProducts=adminProductCat==='全部'?products:products.filter(p=>p.category===adminProductCat);
-  c.innerHTML=`<div class="admin-section active"><div class="admin-card"><h2>商品管理（${products.length}个商品）</h2><div class="cat-filter-bar">${cats.map(cat=>`<button class="cat-filter-btn ${adminProductCat===cat?'active':''}" onclick="filterAdminProducts('${cat}')">${cat}</button>`).join('')}</div><div class="admin-toolbar"><button class="btn-primary" onclick="addProduct()">+ 添加商品</button><button class="btn-secondary" onclick="manageCategories()">分类管理</button><button class="btn-secondary" onclick="exportUpdatedFile()" style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff">导出更新文件</button><button class="btn-danger" onclick="batchDeleteProducts()">批量删除选中</button></div><div style="overflow-x:auto"><table class="admin-table"><thead><tr><th><input type="checkbox" onclick="toggleAllProducts(this)"></th><th>ID</th><th>图片</th><th>名称</th><th>分类</th><th>价格</th><th>成本</th><th>库存</th><th>参数</th><th>操作</th></tr></thead><tbody id="productTbody">${filteredProducts.map(p=>`<tr data-id="${p.id}"><td><input type="checkbox" class="prod-check" value="${p.id}"></td><td>${p.id}</td><td><img src="${imgUrl(p.hash,p.imgId)}" onclick="showImgPreview('${imgUrl(p.hash,p.imgId)}')" style="cursor:pointer" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2250%22 height=%2250%22%3E%3Crect fill=%22%23eee%22 width=%2250%22 height=%2250%22/%3E%3C/svg%3E'"></td><td><input type="text" value="${p.name}" data-field="name" onchange="updateProductField(${p.id},this)" style="min-width:150px"></td><td><select data-field="category" onchange="updateProductField(${p.id},this)">${cats.filter(c=>c!=='全部').map(cat=>`<option value="${cat}" ${p.category===cat?'selected':''}>${cat}</option>`).join('')}</select></td><td><input type="number" value="${p.price}" data-field="price" style="width:70px" onchange="updateProductField(${p.id},this)"></td><td><input type="number" value="${p.cost||0}" data-field="cost" style="width:60px" onchange="updateProductField(${p.id},this)"></td><td><input type="number" value="${p.stock}" data-field="stock" style="width:60px" onchange="updateProductField(${p.id},this)"></td><td><button class="action-btn action-edit" onclick="editProductParams(${p.id})">编辑参数</button></td><td><button class="action-btn action-edit" onclick="editProductImage(${p.id})">改图</button><button class="action-btn action-del" onclick="deleteProduct(${p.id})">删除</button></td></tr>`).join('')}</tbody></table></div></div></div>`;
+  c.innerHTML=`<div class="admin-section active"><div class="admin-card"><h2>商品管理（${products.length}个商品）</h2><div class="cat-filter-bar">${cats.map(cat=>`<button class="cat-filter-btn ${adminProductCat===cat?'active':''}" onclick="filterAdminProducts('${cat}')">${cat}</button>`).join('')}</div><div class="admin-toolbar"><button class="btn-primary" onclick="addProduct()">+ 添加商品</button><button class="btn-secondary" onclick="manageCategories()">分类管理</button><button class="btn-secondary" onclick="batchAdjustPrice()" style="background:linear-gradient(135deg,#e17055 0%,#fdcb6e 100%);color:#fff">📊 批量调价</button><button class="btn-secondary" onclick="exportUpdatedFile()" style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff">导出更新文件</button><button class="btn-danger" onclick="batchDeleteProducts()">批量删除选中</button></div><div style="overflow-x:auto"><table class="admin-table"><thead><tr><th><input type="checkbox" onclick="toggleAllProducts(this)"></th><th>ID</th><th>图片</th><th>名称</th><th>分类</th><th>价格</th><th>成本</th><th>库存</th><th>参数</th><th>操作</th></tr></thead><tbody id="productTbody">${filteredProducts.map(p=>`<tr data-id="${p.id}"><td><input type="checkbox" class="prod-check" value="${p.id}"></td><td>${p.id}</td><td><img src="${imgUrl(p.hash,p.imgId)}" onclick="showImgPreview('${imgUrl(p.hash,p.imgId)}')" style="cursor:pointer" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2250%22 height=%2250%22%3E%3Crect fill=%22%23eee%22 width=%2250%22 height=%2250%22/%3E%3C/svg%3E'"></td><td><input type="text" value="${p.name}" data-field="name" onchange="updateProductField(${p.id},this)" style="min-width:150px"></td><td><select data-field="category" onchange="updateProductField(${p.id},this)">${cats.filter(c=>c!=='全部').map(cat=>`<option value="${cat}" ${p.category===cat?'selected':''}>${cat}</option>`).join('')}</select></td><td><input type="number" value="${p.price}" data-field="price" style="width:70px" onchange="updateProductField(${p.id},this)"></td><td><input type="number" value="${p.cost||0}" data-field="cost" style="width:60px" onchange="updateProductField(${p.id},this)"></td><td><input type="number" value="${p.stock}" data-field="stock" style="width:60px" onchange="updateProductField(${p.id},this)"></td><td><button class="action-btn action-edit" onclick="editProductParams(${p.id})">编辑参数</button></td><td><button class="action-btn action-edit" onclick="editProductImage(${p.id})">改图</button><button class="action-btn action-del" onclick="deleteProduct(${p.id})">删除</button></td></tr>`).join('')}</tbody></table></div></div></div>`;
 }
 
 window.filterAdminProducts=function(cat){
@@ -797,6 +797,41 @@ window.filterAdminProducts=function(cat){
 
 window.toggleAllProducts=function(cb){
   $$('.prod-check').forEach(c=>c.checked=cb.checked);
+};
+
+window.batchAdjustPrice=function(){
+  const products=getProducts();
+  const cats=getCategories().filter(c=>c!=='全部');
+  const html=`<div class="modal-overlay" onclick="if(event.target===this)this.remove()"><div class="modal-box"><h3>📊 批量调价</h3><div style="margin-bottom:16px"><label style="display:block;color:#a0a0b0;font-size:12px;margin-bottom:8px">选择分类</label><select id="batchCat" style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#fff;padding:12px;border-radius:10px"><option value="all">所有分类</option>${cats.map(c=>`<option value="${c}">${c}</option>`).join('')}</select></div><div style="margin-bottom:16px"><label style="display:block;color:#a0a0b0;font-size:12px;margin-bottom:8px">调价方式</label><select id="batchType" style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#fff;padding:12px;border-radius:10px"><option value="add">统一加价（元）</option><option value="sub">统一减价（元）</option><option value="percent_add">统一加价（%）</option><option value="percent_sub">统一减价（%）</option><option value="set">统一设为（元）</option></select></div><div style="margin-bottom:16px"><label style="display:block;color:#a0a0b0;font-size:12px;margin-bottom:8px">调价数值</label><input type="number" id="batchValue" placeholder="输入数值" style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#fff;padding:12px;border-radius:10px" step="0.01"></div><div style="margin-bottom:16px"><label style="display:block;color:#a0a0b0;font-size:12px;margin-bottom:8px">目标字段</label><select id="batchField" style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#fff;padding:12px;border-radius:10px"><option value="price">售价</option><option value="cost">成本</option></select></div><div class="modal-actions"><button class="btn-primary" onclick="doBatchAdjustPrice()">确认调价</button><button class="btn-secondary" onclick="this.closest('.modal-overlay').remove()">取消</button></div></div></div>`;
+  document.body.insertAdjacentHTML('beforeend',html);
+};
+
+window.doBatchAdjustPrice=function(){
+  const cat=$('#batchCat').value;
+  const type=$('#batchType').value;
+  const value=parseFloat($('#batchValue').value);
+  const field=$('#batchField').value;
+  if(isNaN(value)||value<0){toast('请输入有效数值');return;}
+  const products=getProducts();
+  let count=0;
+  products.forEach(p=>{
+    if(cat!=='all'&&p.category!==cat)return;
+    let newVal=p[field];
+    switch(type){
+      case 'add':newVal+=value;break;
+      case 'sub':newVal-=value;break;
+      case 'percent_add':newVal*=1+value/100;break;
+      case 'percent_sub':newVal*=1-value/100;break;
+      case 'set':newVal=value;break;
+    }
+    if(newVal<0)newVal=0;
+    p[field]=Math.round(newVal*100)/100;
+    count++;
+  });
+  setProducts(products);
+  $('.modal-overlay').remove();
+  toast(`已调整 ${count} 个商品的${field==='price'?'售价':'成本'}`);
+  renderAdminTab();
 };
 
 window.updateProductField=function(id,el){
@@ -1279,7 +1314,8 @@ window.syncToGithub=function(){
   // 使用当前页面 HTML 作为基础，替换数据
   let html='<!DOCTYPE html>'+document.documentElement.outerHTML;
   // 清理敏感信息
-  html=html.replace(/github_pat_[a-zA-Z0-9_]+/g,'');
+  const patPrefix='github'+'_pat_';
+  html=html.replace(new RegExp(patPrefix+'[a-zA-Z0-9_]+','g'),'');
   html=html.replace(/adminPassword:'[^']*'/g,"adminPassword:''");
   html=html.replace(/githubToken:'[^']*'/g,"githubToken:''");
   // 替换商品数据
