@@ -1,6 +1,4 @@
-<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
+<!DOCTYPE html><html lang="zh-CN"><head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -471,8 +469,8 @@ button:active{transform:scale(.98)}
 }
 </style>
 </head>
-<body>
-<div id="app"></div>
+<body class="admin-body">
+<div id="app"><div class="admin-header"><div class="admin-header-content"><div class="logo"><div class="logo-icon">🏪</div><h1>商家后台系统</h1></div><div class="admin-nav"><button class="" onclick="switchAdminTab('products')">商品管理</button><button class="" onclick="switchAdminTab('orders')">订单管理</button><button class="" onclick="switchAdminTab('sales')">每日销售</button><button class="" onclick="switchAdminTab('profit')">利润统计</button><button class="" onclick="switchAdminTab('qrcode')">支付二维码</button><button class="" onclick="switchAdminTab('contact')">联系方式</button><button class="" onclick="switchAdminTab('notice')">公告编辑</button><button class="" onclick="switchAdminTab('push')">推送配置</button><button class="active" onclick="switchAdminTab('github')">GitHub同步</button></div><button class="exit-btn" onclick="adminAuthed=false;navigate('#/')">退出</button></div></div><div class="admin-content" id="adminContent"><div class="admin-section active"><div class="admin-card"><h2>GitHub 自动同步</h2><div class="stat-card"><div class="stat-label">配置说明</div><p style="color:#a0a0b0;font-size:13px;margin:12px 0;line-height:1.8">配置 GitHub Token 后，您可以直接在后台一键同步网站到 GitHub，无需手动上传文件。<br>Token 仅保存在您的浏览器中，不会上传到任何服务器。</p></div><div class="stat-card"><div class="stat-label">GitHub Token</div><p style="color:#a0a0b0;font-size:12px;margin:8px 0">获取地址：<a href="https://github.com/settings/tokens?type=beta" target="_blank" style="color:#667eea">https://github.com/settings/tokens?type=beta</a></p><input type="password" id="githubToken" value="" placeholder="粘贴 GitHub Fine-grained Token" style="width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#fff;padding:12px;border-radius:10px;margin-bottom:12px;font-size:13px"><button class="btn-primary" onclick="saveGithubToken()">保存 Token</button><button class="btn-secondary" onclick="syncToGithub()" style="margin-left:8px;background:linear-gradient(135deg,#00b894 0%,#00cec9 100%);color:#fff">🚀 一键同步到 GitHub</button></div><div class="stat-card"><div class="stat-label">同步状态</div><div id="syncStatus" style="color:#a0a0b0;font-size:13px;margin-top:12px"><span style="color:#fdcb6e">⏳ 正在准备同步...</span></div></div></div></div></div></div>
 
 <script>
 // ====== 工具函数 ======
@@ -498,55 +496,12 @@ function nowStr(){return fmtDate(new Date())}
 
 // ====== 数据初始化 ======
 const IMG_BASE='6c334fa405ece854c0e44af881f5c02b';
-const defaultProducts=[
-  {id:1,name:'鴨聊佳10GB中國內地及澳門15日數據卡',price:48,cost:30,category:'鴨聊佳',hash:'03ae8d1c80b015f20e8970b4c3efde35',imgId:'1900561963492167680.jpeg',stock:99,params:{数据:'10GB全中國內地數據及澳門共用數據',登记:'無須登記即買即用',共享:'支援數據共享到其他裝置'}},
-  {id:2,name:'大中华30日12GB上網卡',price:68,cost:45,category:'中华',hash:'11d4b30f11fc2097df85fb78452cde7d',imgId:'1876549623117717504.jpeg',stock:99,params:{流量:'12GB',有效期:'30日',区域:'大中华'}},
-  {id:3,name:'鸭子注册3天2g',price:12,cost:6,category:'注册',hash:'300e9d8b63450d810f4e856f680b4c75',imgId:'1883719920513110016.jpeg',stock:99,params:{流量:'2GB',有效期:'3天',类型:'注册卡'}},
-  {id:4,name:'鴨聊佳15GB中國內地及澳門30日數據卡',price:63,cost:40,category:'鴨聊佳',hash:'6db228e8afa8da514fb1a964bd826955',imgId:'1873652327434633216.jpeg',stock:99,params:{流量:'15GB',有效期:'30日',区域:'中國內地及澳門'}},
-  {id:5,name:'大中华180日18GB',price:100,cost:65,category:'中华',hash:'979a845e1c4916bfe896769439aa88ec',imgId:'1901126706636378112.jpeg',stock:0,params:{流量:'18GB',有效期:'180日',区域:'大中华'}},
-  {id:6,name:'your-48费',price:27,cost:15,category:'注册',hash:'3bba1a698088a4fb7253828508d5984e',imgId:'1875054392190910464.jpeg',stock:99,params:{类型:'注册卡',说明:'48费套餐'}},
-  {id:7,name:'鴨聊佳年15GB',price:118,cost:75,category:'鴨聊佳',hash:'76e1d6668e5cd3494a8c01e10123d0fe',imgId:'1975841541462274048.png',stock:99,params:{流量:'15GB',有效期:'365日',类型:'年卡'}},
-  {id:8,name:'大中华180日21GB',price:100,cost:65,category:'中华',hash:'92f242a08097cd0f4770137697025adb',imgId:'1875966392889651200.jpeg',stock:0,params:{流量:'21GB',有效期:'180日',区域:'大中华'}},
-  {id:9,name:'和记-猴子',price:21,cost:12,category:'和记',hash:'ec7b19bad549715853566d85d9d9a103',imgId:'1878368175503130624.jpeg',stock:99,params:{类型:'和记卡',说明:'猴子套餐'}},
-  {id:10,name:'鴨聊佳年18GB',price:140,cost:90,category:'鴨聊佳',hash:'f63b55039ef13b640d1c95bd56e4b9ed',imgId:'1975841620746665984.png',stock:99,params:{流量:'18GB',有效期:'365日',类型:'年卡'}},
-  {id:11,name:'大中华365日25GB上網卡',price:130,cost:85,category:'中华',hash:'c8ca5bb6913b3e2e78bfe756b66cc128',imgId:'1875965558610190336.jpeg',stock:99,params:{流量:'25GB',有效期:'365日',区域:'大中华'}},
-  {id:12,name:'鸭仔半年20G',price:118,cost:75,category:'鴨聊佳',hash:'f3f791bc419723a716a19f148f8e39a1',imgId:'1892835673460805632.jpeg',stock:99,params:{流量:'20GB',有效期:'180日',类型:'半年卡'}},
-  {id:13,name:'大中华180日38GB上網卡',price:145,cost:95,category:'中华',hash:'3aaced1dff75c84d9e4c90d390d3c89f',imgId:'1875965193993990144.jpeg',stock:99,params:{流量:'38GB',有效期:'180日',区域:'大中华'}},
-  {id:14,name:'数码通-48费',price:26,cost:14,category:'数码通',hash:'574c45298e02d2f1c2b31721c2e57bef',imgId:'1876158754359336960.jpeg',stock:99,params:{类型:'数码通',说明:'48费套餐'}},
-  {id:15,name:'鴨聊佳30GB180日數據卡',price:145,cost:95,category:'鴨聊佳',hash:'92a00fee79d0377679053a89246a1f17',imgId:'1892836419979808768.jpeg',stock:99,params:{流量:'30GB',有效期:'180日',类型:'数据卡'}},
-  {id:16,name:'大中华180日68GB上網卡',price:272,cost:180,category:'中华',hash:'a2188aaf20484ccd347e953011b7c06e',imgId:'1875965910494359552.jpeg',stock:99,params:{流量:'68GB',有效期:'180日',区域:'大中华'}},
-  {id:17,name:'和记注册',price:22,cost:12,category:'和记',hash:'fdff41d256802169662632b45f7f3774',imgId:'1875491576182202368.jpeg',stock:99,params:{类型:'和记卡',说明:'注册套餐'}},
-  {id:18,name:'英国180天45G',price:180,cost:120,category:'cmlink英国',hash:'0cd4a9e4a1913f7159bc4f5d3e304a1e',imgId:'1922919894501912576.jpeg',stock:0,params:{流量:'45GB',有效期:'180天',区域:'英国'}},
-  {id:19,name:'大中华90日100GB上網卡',price:385,cost:260,category:'中华',hash:'e71c9eb25608921210c855d70cdda198',imgId:'1880435427832434688.jpeg',stock:99,params:{流量:'100GB',有效期:'90日',区域:'大中华'}},
-  {id:20,name:'csl-48费',price:24,cost:13,category:'数码通',hash:'9f5ecf927f9e02662a2f5c2b089530f2',imgId:'1874329238673444864.jpeg',stock:99,params:{类型:'CSL',说明:'48费套餐'}},
-  {id:21,name:'和记15G（万能卡）',price:95,cost:60,category:'和记',hash:'05655b5c0926228357807f99f54d7f71',imgId:'1875964291234127872.jpeg',stock:99,params:{流量:'15GB',类型:'万能卡',运营商:'和记'}},
-  {id:22,name:'鴨聊佳63GB',price:340,cost:230,category:'鴨聊佳',hash:'450bf571ef4de1ce3bcb8f31c80884e3',imgId:'1900563088090030080.jpeg',stock:99,params:{流量:'63GB',类型:'大流量卡',运营商:'鴨聊佳'}},
-  {id:23,name:'ABC-48费',price:27,cost:15,category:'注册',hash:'5dadc97ed4d21ab2af66febb8d6d4a77',imgId:'1875492959711125504.jpeg',stock:99,params:{类型:'注册卡',说明:'ABC 48费套餐'}},
-  {id:24,name:'和记365天20G',price:100,cost:65,category:'和记',hash:'3353ebb27b34fa08711bf9010f8c1ae2',imgId:'2050552991442337792.jpeg',stock:99,params:{流量:'20GB',有效期:'365天',运营商:'和记'}},
-  {id:25,name:'鴨聊佳33GB',price:180,cost:120,category:'鴨聊佳',hash:'ad6091bc4ed4a16b109deba7c12ddc69',imgId:'2029019667993464832.jpeg',stock:0,params:{流量:'33GB',运营商:'鴨聊佳'}},
-  {id:26,name:'和记365天33G',price:150,cost:100,category:'和记',hash:'b71ffab6c57893b3f046e43051307dba',imgId:'2059949380316778496.jpeg',stock:99,params:{流量:'33GB',有效期:'365天',运营商:'和记'}},
-  {id:27,name:'数码通365天16G',price:88,cost:55,category:'数码通',hash:'ec151fed5a90e2cc65392e4fc51dba74',imgId:'1875964034035212288.jpeg',stock:99,params:{流量:'16GB',有效期:'365天',运营商:'数码通'}},
-  {id:28,name:'数码通365天35G',price:165,cost:110,category:'数码通',hash:'62650feda5faf33a0086c84a4f572d85',imgId:'1972826568758231040.jpeg',stock:99,params:{流量:'35GB',有效期:'365天',运营商:'数码通'}},
-  {id:29,name:'英国365天38G',price:185,cost:125,category:'cmlink英国',hash:'461f4b8495b10abda1035fdaba4d0cdf',imgId:'2052926101097885696.jpeg',stock:99,params:{流量:'38GB',有效期:'365天',区域:'英国'}},
-  {id:30,name:'英国365天48G',price:205,cost:140,category:'cmlink英国',hash:'3cf739733d0f87c6d59925bfb3f6bdb1',imgId:'2052936436235698176.jpeg',stock:99,params:{流量:'48GB',有效期:'365天',区域:'英国'}},
-  {id:31,name:'HKT-1G（香港电讯）',price:20,cost:10,category:'数码通',hash:'a882840e282902d8e31e868846403c01',imgId:'1992449696778010624.jpeg',stock:99,params:{流量:'1GB',运营商:'HKT香港电讯'}}
-];
+const defaultProducts=[{"id":1,"name":"鴨聊佳10GB中國內地及澳門15日數據卡","price":100,"cost":48,"category":"鴨聊佳","hash":"03ae8d1c80b015f20e8970b4c3efde35","imgId":"1900561963492167680.jpeg","stock":99,"params":{"数据":"10GB全中國內地數據及澳門共用數據","登记":"無須登記即買即用","共享":"支援數據共享到其他裝置"}},{"id":2,"name":"大中华30日12GB上網卡","price":130,"cost":68,"category":"中华","hash":"11d4b30f11fc2097df85fb78452cde7d","imgId":"1876549623117717504.jpeg","stock":99,"params":{"流量":"12GB","有效期":"30日","区域":"大中华"}},{"id":3,"name":"鸭子注册3天2g","price":50,"cost":12,"category":"注册","hash":"300e9d8b63450d810f4e856f680b4c75","imgId":"1883719920513110016.jpeg","stock":99,"params":{"流量":"2GB","有效期":"3天","类型":"注册卡"}},{"id":4,"name":"鴨聊佳15GB中國內地及澳門30日數據卡","price":130,"cost":63,"category":"鴨聊佳","hash":"6db228e8afa8da514fb1a964bd826955","imgId":"1873652327434633216.jpeg","stock":99,"params":{"流量":"15GB","有效期":"30日","区域":"中國內地及澳門"}},{"id":5,"name":"大中华180日18GB","price":160,"cost":100,"category":"中华","hash":"979a845e1c4916bfe896769439aa88ec","imgId":"1901126706636378112.jpeg","stock":0,"params":{"流量":"18GB","有效期":"180日","区域":"大中华"}},{"id":6,"name":"your-48费","price":27,"cost":15,"category":"注册","hash":"3bba1a698088a4fb7253828508d5984e","imgId":"1875054392190910464.jpeg","stock":99,"params":{"类型":"注册卡","说明":"48费套餐"}},{"id":7,"name":"鴨聊佳年15GB","price":118,"cost":75,"category":"鴨聊佳","hash":"76e1d6668e5cd3494a8c01e10123d0fe","imgId":"1975841541462274048.png","stock":99,"params":{"流量":"15GB","有效期":"365日","类型":"年卡"}},{"id":8,"name":"大中华180日21GB","price":100,"cost":65,"category":"中华","hash":"92f242a08097cd0f4770137697025adb","imgId":"1875966392889651200.jpeg","stock":0,"params":{"流量":"21GB","有效期":"180日","区域":"大中华"}},{"id":9,"name":"和记-猴子","price":21,"cost":12,"category":"和记","hash":"ec7b19bad549715853566d85d9d9a103","imgId":"1878368175503130624.jpeg","stock":99,"params":{"类型":"和记卡","说明":"猴子套餐"}},{"id":10,"name":"鴨聊佳年18GB","price":140,"cost":90,"category":"鴨聊佳","hash":"f63b55039ef13b640d1c95bd56e4b9ed","imgId":"1975841620746665984.png","stock":99,"params":{"流量":"18GB","有效期":"365日","类型":"年卡"}},{"id":11,"name":"大中华365日25GB上網卡","price":130,"cost":85,"category":"中华","hash":"c8ca5bb6913b3e2e78bfe756b66cc128","imgId":"1875965558610190336.jpeg","stock":99,"params":{"流量":"25GB","有效期":"365日","区域":"大中华"}},{"id":12,"name":"鸭仔半年20G","price":118,"cost":75,"category":"鴨聊佳","hash":"f3f791bc419723a716a19f148f8e39a1","imgId":"1892835673460805632.jpeg","stock":99,"params":{"流量":"20GB","有效期":"180日","类型":"半年卡"}},{"id":13,"name":"大中华180日38GB上網卡","price":145,"cost":95,"category":"中华","hash":"3aaced1dff75c84d9e4c90d390d3c89f","imgId":"1875965193993990144.jpeg","stock":99,"params":{"流量":"38GB","有效期":"180日","区域":"大中华"}},{"id":14,"name":"数码通-48费","price":26,"cost":14,"category":"数码通","hash":"574c45298e02d2f1c2b31721c2e57bef","imgId":"1876158754359336960.jpeg","stock":99,"params":{"类型":"数码通","说明":"48费套餐"}},{"id":15,"name":"鴨聊佳30GB180日數據卡","price":145,"cost":95,"category":"鴨聊佳","hash":"92a00fee79d0377679053a89246a1f17","imgId":"1892836419979808768.jpeg","stock":99,"params":{"流量":"30GB","有效期":"180日","类型":"数据卡"}},{"id":16,"name":"大中华180日68GB上網卡","price":272,"cost":180,"category":"中华","hash":"a2188aaf20484ccd347e953011b7c06e","imgId":"1875965910494359552.jpeg","stock":99,"params":{"流量":"68GB","有效期":"180日","区域":"大中华"}},{"id":17,"name":"和记注册","price":22,"cost":12,"category":"和记","hash":"fdff41d256802169662632b45f7f3774","imgId":"1875491576182202368.jpeg","stock":99,"params":{"类型":"和记卡","说明":"注册套餐"}},{"id":18,"name":"英国180天45G","price":180,"cost":120,"category":"cmlink英国","hash":"0cd4a9e4a1913f7159bc4f5d3e304a1e","imgId":"1922919894501912576.jpeg","stock":0,"params":{"流量":"45GB","有效期":"180天","区域":"英国"}},{"id":19,"name":"大中华90日100GB上網卡","price":385,"cost":260,"category":"中华","hash":"e71c9eb25608921210c855d70cdda198","imgId":"1880435427832434688.jpeg","stock":99,"params":{"流量":"100GB","有效期":"90日","区域":"大中华"}},{"id":20,"name":"csl-48费","price":24,"cost":13,"category":"数码通","hash":"9f5ecf927f9e02662a2f5c2b089530f2","imgId":"1874329238673444864.jpeg","stock":99,"params":{"类型":"CSL","说明":"48费套餐"}},{"id":21,"name":"和记15G（万能卡）","price":95,"cost":60,"category":"和记","hash":"05655b5c0926228357807f99f54d7f71","imgId":"1875964291234127872.jpeg","stock":99,"params":{"流量":"15GB","类型":"万能卡","运营商":"和记"}},{"id":22,"name":"鴨聊佳63GB","price":340,"cost":230,"category":"鴨聊佳","hash":"450bf571ef4de1ce3bcb8f31c80884e3","imgId":"1900563088090030080.jpeg","stock":99,"params":{"流量":"63GB","类型":"大流量卡","运营商":"鴨聊佳"}},{"id":23,"name":"ABC-48费","price":27,"cost":15,"category":"注册","hash":"5dadc97ed4d21ab2af66febb8d6d4a77","imgId":"1875492959711125504.jpeg","stock":99,"params":{"类型":"注册卡","说明":"ABC 48费套餐"}},{"id":24,"name":"和记365天20G","price":100,"cost":65,"category":"和记","hash":"3353ebb27b34fa08711bf9010f8c1ae2","imgId":"2050552991442337792.jpeg","stock":99,"params":{"流量":"20GB","有效期":"365天","运营商":"和记"}},{"id":25,"name":"鴨聊佳33GB","price":180,"cost":120,"category":"鴨聊佳","hash":"ad6091bc4ed4a16b109deba7c12ddc69","imgId":"2029019667993464832.jpeg","stock":0,"params":{"流量":"33GB","运营商":"鴨聊佳"}},{"id":26,"name":"和记365天33G","price":150,"cost":100,"category":"和记","hash":"b71ffab6c57893b3f046e43051307dba","imgId":"2059949380316778496.jpeg","stock":99,"params":{"流量":"33GB","有效期":"365天","运营商":"和记"}},{"id":27,"name":"数码通365天16G","price":88,"cost":55,"category":"数码通","hash":"ec151fed5a90e2cc65392e4fc51dba74","imgId":"1875964034035212288.jpeg","stock":99,"params":{"流量":"16GB","有效期":"365天","运营商":"数码通"}},{"id":28,"name":"数码通365天35G","price":165,"cost":110,"category":"数码通","hash":"62650feda5faf33a0086c84a4f572d85","imgId":"1972826568758231040.jpeg","stock":99,"params":{"流量":"35GB","有效期":"365天","运营商":"数码通"}},{"id":29,"name":"英国365天38G","price":185,"cost":125,"category":"cmlink英国","hash":"461f4b8495b10abda1035fdaba4d0cdf","imgId":"2052926101097885696.jpeg","stock":99,"params":{"流量":"38GB","有效期":"365天","区域":"英国"}},{"id":30,"name":"英国365天48G","price":205,"cost":140,"category":"cmlink英国","hash":"3cf739733d0f87c6d59925bfb3f6bdb1","imgId":"2052936436235698176.jpeg","stock":99,"params":{"流量":"48GB","有效期":"365天","区域":"英国"}},{"id":31,"name":"HKT-1G（香港电讯）","price":20,"cost":10,"category":"数码通","hash":"a882840e282902d8e31e868846403c01","imgId":"1992449696778010624.jpeg","stock":99,"params":{"流量":"1GB","运营商":"HKT香港电讯"}}];
 
 // Base64 images removed - using external URLs to reduce file size
 
-const defaultCategories=['全部','和记','数码通','cmlink英国','鴨聊佳','中华','注册'];
-const defaultSettings={
-  wechat:'dt0822dt',
-  contacts:[{type:'wechat',label:'微信',value:'dt0822dt',img:''}],
-  notice:'',
-  qrCode:{wechat:'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=wechat_pay_placeholder',alipay:'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=alipay_placeholder',usdt:'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=usdt_placeholder'},
-  pushKey:'',
-  wechatQr:'',
-  githubToken:'',
-  githubOwner:'lq031471-lq',
-  githubRepo:'hk-sim-shop',
-  githubBranch:'main'
-};
+const defaultCategories=["全部","和记","数码通","cmlink英国","鴨聊佳","中华","注册"];
+const defaultSettings={"wechat":"dt0822dt","contacts":[{"type":"wechat","label":"微信","value":"dt0822dt","img":""}],"notice":"","qrCode":{"wechat":"https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=wechat_pay_placeholder","alipay":"https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=alipay_placeholder","usdt":"https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=usdt_placeholder"},"pushKey":"","wechatQr":"","githubToken":"","githubOwner":"lq031471-lq","githubRepo":"hk-sim-shop","githubBranch":"main","adminPassword":""};
 
 function loadData(key,def){
   try{const v=localStorage.getItem(key);return v?JSON.parse(v):def}catch(e){return def}
@@ -1496,7 +1451,7 @@ window.syncToGithub=function(){
   // 清理敏感信息
   const patPrefix='github'+'_pat_';
   html=html.replace(new RegExp(patPrefix+'[a-zA-Z0-9_]+','g'),'');
-  html=html.replace(/githubToken:'[^']*'/g,"githubToken:''");
+  html=html.replace(/githubToken:'']*'/g,"githubToken:''");
   // 替换商品数据
   try{
     const products=JSON.parse(localStorage.getItem('ss_products'));
@@ -1620,5 +1575,5 @@ window.syncToGithub=function(){
 // ====== 启动 ======
 router();
 </script>
-</body>
-</html>
+
+</body></html>
